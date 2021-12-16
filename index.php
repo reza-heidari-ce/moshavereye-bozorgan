@@ -1,8 +1,22 @@
 <?php
-$question = 'این یک پرسش نمونه است';
-$msg = 'این یک پاسخ نمونه است';
+$question = '';
+$msg = 'سوال خود را بپرس!';
 $en_name = 'hafez';
 $fa_name = 'حافظ';
+$names=file_get_contents("people.json");
+$arr=json_decode($names,true);
+if($_POST["person"]){
+    $en_name=$_POST["person"];
+    $fa_name=$arr[$en_name];
+    $question=$_POST["question"];
+    $messages=file("messages.txt");
+    $hash_num=hash('md5',"$en_name"."$question");
+    $msg=$messages[$hash_num%count($messages)];
+}
+else{
+    $en_name=array_rand($arr,1);
+    $fa_name=$arr[$en_name];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -15,7 +29,11 @@ $fa_name = 'حافظ';
 <p id="copyright">تهیه شده برای درس کارگاه کامپیوتر،دانشکده کامییوتر، دانشگاه صنعتی شریف</p>
 <div id="wrapper">
     <div id="title">
-        <span id="label">پرسش:</span>
+        <?php
+        if($question){
+            echo '<span id="label">پرسش:</span>';
+        }
+        ?>
         <span id="question"><?php echo $question ?></span>
     </div>
     <div id="container">
@@ -29,6 +47,7 @@ $fa_name = 'حافظ';
             </div>
         </div>
     </div>
+
     <div id="new-q">
         <form method="post">
             سوال
@@ -36,16 +55,20 @@ $fa_name = 'حافظ';
             را از
             <select name="person">
                 <?php
-                /*
-                 * Loop over people data and
-                 * enter data inside `option` tag.
-                 * E.g., <option value="hafez">حافظ</option>
-                 */
+                foreach($arr as $name => $fname){
+                    if($name==$en_name){
+                        echo '<option value='."$name".' selected>'."$fname".'</option>';
+                    }
+                    else {
+                        echo '<option value='."$name".'>'."$fname".'</option>';
+                    }  
+                }
                 ?>
             </select>
             <input type="submit" value="بپرس"/>
         </form>
     </div>
+
 </div>
 </body>
 </html>
